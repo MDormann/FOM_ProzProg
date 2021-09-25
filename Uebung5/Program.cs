@@ -60,12 +60,13 @@ namespace Uebung5
             Console.Write("Reihenfolge:\t");
             for (int i = 0; i < arrayOfNumber.Length; i++)
             {
-                string output = $"{arrayOfNumber[i]}";
+                string output = Convert.ToString(arrayOfNumber[i]);
 
                 if (i < arrayOfNumber.Length -1)
                 {
                     output += ", ";
                 }
+                
                 Console.Write(output);
             }
         }
