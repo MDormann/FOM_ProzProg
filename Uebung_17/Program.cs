@@ -9,8 +9,8 @@ namespace Uebung_17
 {
     class Program
     {
-        private static List<Address> Addresses = new List<Address>();
-        private static string FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "addresses.csv");
+        private static AddressManager _addressManager = new AddressManager(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "addresses.csv"));
+        
 
         static void Main(string[] args)
         {
@@ -26,9 +26,7 @@ namespace Uebung_17
             Console.WriteLine(@"Erweiterung für die ganz schnellen:");
             Console.WriteLine(@"Wie würden Sie die Anwendung unter realeren Bedingungen, hinsichtlich der Persistenz und der Datenmodellierung, gestalten?");
 
-            ReadAddresses();
-            
-            
+
             Console.WriteLine("Willkommen in der Adressverwaltung!");
             while (true)
             {
@@ -51,8 +49,8 @@ namespace Uebung_17
                         Console.Write("Bitte geben Sie die Id ein: ");
                         
                         var id = int.Parse(Console.ReadLine());
-                        
-                        var address = LoadAddress(id);
+
+                        var address = _addressManager.LoadAddress(id);
                         PrintAddress(address);
                         
                         break;
@@ -100,39 +98,7 @@ namespace Uebung_17
             Console.Write("Firma: ");
             address.Firma = Console.ReadLine();
 
-
-            var maxId = 0;
-            
-            // Weg 1: mit "Boardmitteln"
-            if(Addresses.Any())
-                maxId = Addresses.Max(address => address.Id);
-
-            // Weg 2: klassischer Weg
-            foreach (var address1 in Addresses)
-            {
-                if (address.Id > maxId)
-                    maxId = address.Id;
-            }
-
-            address.Id = maxId + 1;
-            
-            Addresses.Add(address);
-            SaveAddresses();
-        }
-
-        static Address LoadAddress(int id)
-        {
-            Address address1 = new Address();
-
-            foreach (var address in Addresses)
-            {
-                if (address.Id == id)
-                    address1 = address;
-            }
-
-            var address2 = Addresses.FirstOrDefault(address => address.Id == id);
-
-            return address1;
+            _addressManager.CreateAddress(address);
         }
 
         static void PrintAddress(Address address)
@@ -151,40 +117,6 @@ namespace Uebung_17
             Console.WriteLine($"Firma: {address.Firma}");
         }
         
-        static void ReadAddresses()
-        {
-            var inputLines = File.ReadAllLines(FileName, Encoding.UTF8);
-
-            foreach (var line in inputLines)
-            {
-                var entries = line.Split(";");
-
-                if (entries.Length != 12)
-                {
-                    Debug.WriteLine("Wrong data format!");
-                    continue;
-                }
-
-                foreach (var entry in entries)
-                {
-                    Addresses.Add(new Address()
-                    {
-                        Id = int.Parse(entry[0].ToString()),
-                        Anrede = entry[1].ToString(),
-                        Titel = entry[2].ToString(), 
-                        Vorname = entry[3].ToString(),
-                        Name = entry[4].ToString(),
-                        Straße = entry[5].ToString(),
-                        PLZ = entry[6].ToString(),
-                        Ort = entry[7].ToString(),
-                        Land = entry[8].ToString(),
-                        Telefon = entry[9].ToString(),
-                        eMail = entry[10].ToString(),
-                        Firma = entry[11].ToString(),
-                    });
-                }
-            }
-        }
 
         static void DeleteAddress()
         {
@@ -192,11 +124,8 @@ namespace Uebung_17
             
             Console.Write("Bitte geben Sie die Id ein: ");
             var id = int.Parse(Console.ReadLine());
-
-            var address = LoadAddress(id);
-
-            Addresses.Remove(address);
-            SaveAddresses();
+            
+            _addressManager.DeleteAddress(id);
         }
 
         static void SearchAddress()
@@ -206,34 +135,7 @@ namespace Uebung_17
             Console.Write("Bitte geben Sie den Namen ein: ");
             var name = Console.ReadLine();
 
-            foreach (var address in Addresses)
-            {
-                if (address.Name.Contains(name))
-                    PrintAddress(address);
-            }
-        }
-        
-        static void SaveAddresses()
-        {
-            List<string> export = new List<string>();
-            
-            foreach (var address in Addresses)
-            {
-                export.Add($"{address.Id};" +
-                           $"{address.Anrede};" +
-                           $"{address.Titel};" +
-                           $"{address.Vorname};" +
-                           $"{address.Name};" +
-                           $"{address.Straße};" +
-                           $"{address.PLZ};" +
-                           $"{address.Ort};" +
-                           $"{address.Land};" +
-                           $"{address.Telefon};" +
-                           $"{address.eMail};" +
-                           $"{address.Firma}");
-            }
-            
-            File.WriteAllLines(FileName, export, Encoding.UTF8);
+            _addressManager.SearchAddress(name);
         }
     }
 }

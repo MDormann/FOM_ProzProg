@@ -1,6 +1,6 @@
 namespace Uebung_17
 {
-    public struct Address
+    public class Address
     {
         public int Id { get; set; }
         public string Anrede { get; set; }
